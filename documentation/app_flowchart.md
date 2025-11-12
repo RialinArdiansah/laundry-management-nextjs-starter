@@ -1,14 +1,15 @@
 flowchart TD
-  Start[Landing Page]
-  SignUpPage[Sign Up Page]
-  SignInPage[Sign In Page]
-  AuthAPI[Authentication API Endpoint]
-  DashboardPage[Dashboard Page]
-  Start -->|Select Sign Up| SignUpPage
-  Start -->|Select Sign In| SignInPage
-  SignUpPage -->|Submit Credentials| AuthAPI
-  SignInPage -->|Submit Credentials| AuthAPI
-  AuthAPI -->|Success| DashboardPage
-  AuthAPI -->|Error| SignUpPage
-  AuthAPI -->|Error| SignInPage
-  DashboardPage -->|Click Logout| Start
+  Start[Public Home Page]
+  Start --> Check[Check Status Laundry]
+  Check --> Results[Status Results]
+  Start --> Login[Login Page]
+  Login --> Auth[Authentication System]
+  Auth -->|Pegawai| PegDashboard[Dashboard Pegawai]
+  Auth -->|Owner| OwnerDashboard[Dashboard Owner]
+  PegDashboard --> OrderEntry[Order Entry]
+  OrderEntry --> SaveOrder[Save Order]
+  SaveOrder --> PegDashboard
+  PegDashboard --> CustomerData[Data Pelanggan]
+  OwnerDashboard --> EmployeeData[Data Pegawai]
+  OwnerDashboard --> Reports[Transaction Reports]
+  OwnerDashboard --> Monitoring[Operational Monitoring]

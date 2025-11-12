@@ -1,90 +1,99 @@
-# Tech Stack Document
+# Laundry Management System: Tech Stack Document
 
-This document explains the key technologies chosen for the **codeguide-starter** project. It’s written in everyday language so anyone—technical or not—can understand why each tool was picked and how it supports the application.
+This document explains the technology choices behind our Laundry Management System in simple terms. You don’t need a technical background to understand how each part works and why we picked it.
 
 ## 1. Frontend Technologies
-The frontend is everything the user sees and interacts with. For this project, we’ve used:
+These are the tools and libraries that build the part of the app you see and interact with.
 
-- **Next.js (App Router)**
-  - A React framework that makes page routing, server-side rendering, and API routes very simple.
-  - Enhances user experience by pre-rendering pages on the server or at build time, leading to faster initial load.
-- **React 18**
-  - The underlying library for building user interfaces with reusable components.
-  - Provides a smooth, interactive experience thanks to its virtual DOM and modern hooks.
-- **TypeScript**
-  - A superset of JavaScript that adds types (labels for data).
-  - Helps catch errors early during development and makes the code easier to maintain.
-- **CSS (globals.css & theme.css)**
-  - **globals.css** applies base styles (fonts, colors, resets) across the entire app.
-  - **dashboard/theme.css** defines the look and feel specific to the dashboard area.
-  - This separation keeps styles organized and avoids accidental style conflicts.
+- **Next.js (App Router & Server Components)**  
+  A framework that lets us build fast web pages and organize our code neatly. Server Components help deliver content to you faster by doing some work on the server before it reaches your browser.
 
-By combining these tools, we have a clear structure (Next.js folders for pages and layouts), safer code (TypeScript), and flexible styling with vanilla CSS.
+- **TypeScript**  
+  A version of JavaScript with extra checks. It catches mistakes early, so the app is more reliable.
+
+- **Tailwind CSS v4**  
+  A styling tool that provides ready-made design bits (like colors, spacing, and fonts). It lets us style the interface quickly and consistently without writing lots of custom CSS.
+
+- **shadcn/ui**  
+  A collection of pre-built user interface pieces (buttons, forms, tables, dialogs). This library works on top of Tailwind CSS, giving us a polished look out of the box.
+
+- **React Query (TanStack Query)**  
+  Manages data fetching and caching behind the scenes. It helps keep data like customer lists and transaction reports up to date without writing extra code for loading states.
+
+- **Zustand**  
+  Manages complex on-screen states, such as multi-field forms. It keeps track of what you type and select in the order entry screens.
 
 ## 2. Backend Technologies
-The backend handles data, user accounts, and the logic behind the scenes. Our choices here are:
+These components handle data processing, storage, and business logic behind the scenes.
 
-- **Next.js API Routes**
-  - Allows us to write server-side code (`route.ts` files) alongside our frontend in the same project.
-  - Runs on Node.js, so we can handle requests like sign-up, sign-in, and data fetching in one place.
-- **Node.js Runtime**
-  - The JavaScript environment on the server that executes our API routes.
-- **bcrypt** (npm package)
-  - A library for hashing passwords securely before storing them.
-  - Ensures that even if someone got access to our data, raw passwords aren’t visible.
-- **(Optional) NextAuth.js or JWT**
-  - While this starter kit shows a custom authentication flow, it can easily integrate services like NextAuth.js for email-based login or JWT (JSON Web Tokens) for stateless sessions.
+- **Next.js API Routes & Server Actions**  
+  Two ways to handle data operations (like saving an order). Server Actions let us write data-updating code right next to the form components, making the flow simpler and cleaner.
 
-These components work together to receive user credentials, verify or store them securely, manage sessions or tokens, and deliver protected data back to the frontend.
+- **NextAuth (Auth.js)**  
+  Handles user sign-up, login, and role-based access (Employee vs. Owner). It ensures only authorized users see the right dashboards.
+
+- **PostgreSQL**  
+  A reliable database where we store all information: customers, orders, employees, and more.
+
+- **Drizzle ORM**  
+  A tool that connects our code with the PostgreSQL database in a safe, type-checked way. We define our data structure once, and Drizzle ensures consistency when reading or writing data.
+
+- **Zod**  
+  Validates data coming from forms before it reaches the database. It ensures required fields are filled out and values are in the correct format.
 
 ## 3. Infrastructure and Deployment
-Infrastructure covers where and how we host the app, as well as how changes get delivered:
+This covers where the app lives, how we deploy updates, and how we manage the code.
 
-- **Git & GitHub**
-  - Version control system (Git) and remote hosting (GitHub) keep track of all code changes and allow team collaboration.
-- **Vercel (or Netlify)**
-  - A popular hosting service optimized for Next.js, with one-click deployments and global content delivery.
-  - Automatically rebuilds and deploys the site whenever code is pushed to the main branch.
-- **GitHub Actions (CI/CD)**
-  - Automates tasks like linting (ESLint), formatting (Prettier), and running any tests you add.
-  - Ensures that only clean, tested code goes live.
+- **Vercel (Hosting Platform)**  
+  A cloud service optimized for Next.js applications. It automatically builds and serves our app with global distribution so users get fast load times.
 
-Together, these tools provide a reliable, scalable setup where every code change is tested and deployed quickly, with minimal manual work.
+- **Git & GitHub (Version Control)**  
+  We store and track all code changes in GitHub. This helps multiple developers work together safely and review each other’s code.
+
+- **Continuous Integration / Continuous Deployment (CI/CD)**  
+  Automated pipelines that run tests and deploy the app whenever we push new code. This ensures new features or fixes go live quickly and reliably.
+
+- **Drizzle Migrations & Seed Scripts**  
+  Tools to manage database structure and initial data. Migrations update the database schema safely, and seed scripts fill in sample data for development.
 
 ## 4. Third-Party Integrations
-While this starter kit is minimal by design, it already includes or can easily add:
+External services that extend our app’s functionality without reinventing the wheel.
 
-- **bcrypt**
-  - For secure password hashing (included as an npm dependency).
-- **NextAuth.js** (optional)
-  - A full-featured authentication library supporting email/password, OAuth, and more.
-- **Sentry or LogRocket** (optional)
-  - For real-time error tracking and performance monitoring in production.
+- **react-to-print**  
+  Enables printing of transaction receipts (Notas) directly from the browser in a printable format.
 
-These integrations help extend the app’s capabilities without building every feature from scratch.
+- **Pusher or Supabase Realtime (optional)**  
+  Provides live updates on order status for dashboards, removing the need for users to manually refresh the page.
+
+- **Recharts**  
+  A chart library we use to display graphs and visual reports in the Owner dashboard.
 
 ## 5. Security and Performance Considerations
-We’ve baked in several measures to keep users safe and the app running smoothly:
+Measures we put in place to keep data safe and ensure a smooth user experience.
 
-Security:
-- Passwords are never stored in plain text—bcrypt hashes them with a random salt.
-- API routes can implement CSRF protection and input validation to block malicious requests.
-- Session tokens or cookies are marked secure and HttpOnly to prevent theft via JavaScript.
+- **Role-Based Access Control (RBAC)**  
+  Using NextAuth, we define Employee and Owner roles. Middleware checks protect routes so only the right users can access each dashboard.
 
-Performance:
-- Server-side rendering (SSR) and static site generation (SSG) in Next.js deliver pages faster.
-- Code splitting and lazy-loaded components ensure users only download what they need.
-- Global CSS and theme files are small and cached by the browser for quick repeat visits.
+- **Data Validation (Zod)**  
+  Ensures form inputs meet expected rules before data is saved, reducing errors and malicious input.
 
-These strategies work together to give users a fast, secure experience every time.
+- **Data Caching (React Query)**  
+  Stores recent data in memory, so pages load faster and network requests are minimized.
+
+- **Server-Side Rendering & Server Components**  
+  Prepares pages on the server to reduce load times and improve SEO.
+
+- **Automated Testing**  
+  • Unit tests with Vitest (or Jest) to check individual functions like price calculations.  
+  • End-to-end tests with Playwright (or Cypress) to verify key user flows (order entry, status checks, employee management).
 
 ## 6. Conclusion and Overall Tech Stack Summary
-In building **codeguide-starter**, we chose technologies that:
+In building our Laundry Management System, we chose modern, reliable tools that work well together:
 
-- Align with modern web standards (Next.js, React, TypeScript).
-- Provide a clear, file-based project structure for rapid onboarding.
-- Offer built-in support for server-side rendering, API routes, and static assets.
-- Emphasize security through password hashing, session management, and safe defaults.
-- Enable easy scaling and future enhancements via modular code and optional integrations.
+- Frontend: Next.js, TypeScript, Tailwind CSS, shadcn/ui, React Query, Zustand
+- Backend: Next.js API & Server Actions, NextAuth, PostgreSQL, Drizzle ORM, Zod
+- Infrastructure: Vercel hosting, GitHub, CI/CD pipelines, database migrations & seeds
+- Integrations: react-to-print, optional real-time updates, Recharts for charts
+- Security & Performance: Role checks, data validation, caching, server-side optimizations, automated tests
 
-This stack strikes a balance between simplicity for newcomers and flexibility for experienced teams. It accelerates development of a secure authentication flow and a polished dashboard, while leaving room to plug in databases, test suites, and advanced features as the project grows.
+These choices strike the right balance between developer productivity, application speed, and data safety. They align with project goals—delivering a user-friendly system for employees and owners—and set our Laundry Management System apart with a solid, future-proof foundation.
