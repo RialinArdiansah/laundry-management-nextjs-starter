@@ -1,117 +1,95 @@
-# Project Requirements Document: codeguide-starter
-
----
+# Project Requirements Document: Laundry Management System
 
 ## 1. Project Overview
+This web-based Laundry Management System is designed to help small to medium laundry businesses move from manual or spreadsheet-based order tracking to a streamlined digital workflow. Through a public portal, customers can check their laundry status, and through secure, role-based dashboards, employees (“Pegawai”) and owners (“Owner”) can manage orders, customers, employees, and financial reports.
 
-The **codeguide-starter** project is a boilerplate web application that provides a ready-made foundation for any web project requiring secure user authentication and a post-login dashboard. It sets up the common building blocks—sign-up and sign-in pages, API routes to handle registration and login, and a simple dashboard interface driven by static data. By delivering this skeleton, it accelerates development time and ensures best practices are in place from day one.
-
-This starter kit is being built to solve the friction developers face when setting up repeated common tasks: credential handling, session management, page routing, and theming. Key objectives include: 1) delivering a fully working authentication flow (registration & login), 2) providing a gated dashboard area upon successful login, 3) establishing a clear, maintainable project structure using Next.js and TypeScript, and 4) demonstrating a clean theming approach with global and section-specific CSS. Success is measured by having an end-to-end login journey in under 200 lines of code and zero runtime type errors.
-
----
+By building this system, the goal is to reduce errors in order entry, speed up customer check-ins and status lookups, and give owners real-time visibility into operations and revenue. Success will be measured by faster order processing times, fewer lost or misplaced orders, and clear, actionable reports that help owners make data-driven decisions.
 
 ## 2. In-Scope vs. Out-of-Scope
 
-### In-Scope (Version 1)
-- User registration (sign-up) form with validation
-- User login (sign-in) form with validation
-- Next.js API routes under `/api/auth/route.ts` handling:
-  - Credential validation
-  - Password hashing (e.g., bcrypt)
-  - Session creation or JWT issuance
-- Protected dashboard pages under `/dashboard`:
-  - `layout.tsx` wrapping dashboard content
-  - `page.tsx` rendering static data from `data.json`
-- Global application layout in `/app/layout.tsx`
-- Basic styling via `globals.css` and `dashboard/theme.css`
-- TypeScript strict mode enabled
+In-Scope (Version 1):
+- Public landing page and **Status Check** page (customers enter order ID to see progress)
+- Authentication with NextAuth.js supporting two roles: **Pegawai** and **Owner**
+- **Pegawai Dashboard**:
+  - Create new orders (Pelanggan + Pesanan)
+  - View and edit existing orders (update weight, service type, status)
+  - Browse customer list (Pelanggan) with search and filter
+- **Owner Dashboard**:
+  - Manage employee accounts (add, edit, deactivate Pegawai)
+  - View transaction history with date-range filters
+  - View summary reports (daily orders, revenue, average turnaround time)
+- Receipt (Nota) generation and printable view via `react-to-print`
+- Responsive UI with Tailwind CSS and shadcn/ui component library
+- PostgreSQL database with Drizzle ORM schema and migrations
+- Server Actions for all create/update/delete operations, validated by Zod
+- Basic unit tests (Vitest) and end-to-end tests (Playwright)
 
-### Out-of-Scope (Later Phases)
-- Integration with a real database (PostgreSQL, MongoDB, etc.)
-- Advanced authentication flows (password reset, email verification, MFA)
-- Role-based access control (RBAC)
-- Multi-tenant or white-label theming
-- Unit, integration, or end-to-end testing suites
-- CI/CD pipeline and production deployment scripts
-
----
+Out-of-Scope (Future Phases):
+- Real-time push updates (e.g., Pusher/Supabase Realtime)
+- Mobile app or native wrapper
+- SMS/email notifications for status changes
+- Advanced analytics or BI integrations
+- Forgot-password and self-service password reset flows
+- Multi-location or franchise support
 
 ## 3. User Flow
+A public visitor lands on the home page and clicks “Check Laundry Status.” They enter an order ID, submit the form, and immediately see a timeline of status updates (Received → In Progress → Completed → Picked Up). If they enter an invalid ID, an error toast appears.
 
-A new visitor lands on the root URL and sees a welcome page with options to **Sign Up** or **Sign In**. If they choose Sign Up, they fill in their email, password, and hit “Create Account.” The form submits to `/api/auth/route.ts`, which hashes the password, creates a new user session or token, and redirects them to the dashboard. If any input is invalid, an inline error message explains the issue (e.g., “Password too short”).
+An employee logs in via email and password on the **Login** page. After authentication, they arrive at their dashboard, see a sidebar with menu items (“New Order,” “Customers,” “Transactions”), and a main panel showing today’s pending orders. They click “New Order,” fill out customer details and laundry weight/service, submit to save, then optionally print a receipt. To update status, they navigate to “Transactions,” select an order, change its status, and click “Save.”
 
-Once authenticated, the user is taken to the `/dashboard` route. Here they see a sidebar or header defined by `dashboard/layout.tsx`, and the main panel pulls in static data from `data.json`. They can log out (if that control is present), but otherwise their entire session is managed by server-side cookies or tokens. Returning users go directly to Sign In, submit credentials, and upon success they land back on `/dashboard`. Any unauthorized access to `/dashboard` redirects back to Sign In.
-
----
+An owner logs in and sees a different sidebar (“Employee Management,” “Reports,” “Monitoring”). They add or edit employee accounts under “Employee Management,” then browse “Reports” to view charts and tables summarizing revenue, order counts, and average processing times. They can filter by date or employee and export to CSV.
 
 ## 4. Core Features
-
-- **Sign-Up Page (`/app/sign-up/page.tsx`)**: Form fields for email & password, client-side validation, POST to `/api/auth`.
-- **Sign-In Page (`/app/sign-in/page.tsx`)**: Form fields for email & password, client-side validation, POST to `/api/auth`.
-- **Authentication API (`/app/api/auth/route.ts`)**: Handles both registration and login based on HTTP method, integrates password hashing (bcrypt) and session or JWT logic.
-- **Global Layout (`/app/layout.tsx` + `globals.css`)**: Shared header, footer, and CSS resets across all pages.
-- **Dashboard Layout (`/app/dashboard/layout.tsx` + `dashboard/theme.css`)**: Sidebar or top nav for authenticated flows, section-specific styling.
-- **Dashboard Page (`/app/dashboard/page.tsx`)**: Reads `data.json`, renders it as cards or tables.
-- **Static Data Source (`/app/dashboard/data.json`)**: Example dataset to demo dynamic rendering.
-- **TypeScript Configuration**: `tsconfig.json` with strict mode and path aliases (if any).
-
----
+- **Authentication & RBAC**: NextAuth.js with role-based protection (Pegawai vs. Owner).
+- **Public Status Check**: Single-page form to query order status by ID.
+- **Order Management**:
+  • Create, read, update orders with fields: customer name, contact, weight, service type, status, total cost.
+  • Drizzle ORM models for `Pelanggan`, `Pesanan`, `Pegawai`.
+- **Customer List**: Table with search, sort, pagination.
+- **Employee Management**: Owner-only CRUD for `Pegawai` accounts.
+- **Transaction Reports**: Date-filtered tables and charts (using Recharts).
+- **Printable Receipts**: `react-to-print` component styled with Tailwind.
+- **Forms & Validation**: Zod schemas for all Server Actions and form inputs.
+- **UI Components & Theming**: Tailwind CSS, shadcn/ui for inputs, buttons, tables, dialogs, toasts; dark mode support.
+- **Testing**: Unit tests (Vitest) and E2E tests (Playwright).
 
 ## 5. Tech Stack & Tools
-
-- **Framework**: Next.js (App Router) for file-based routing, SSR/SSG, and API routes.
-- **Language**: TypeScript for type safety.
-- **UI Library**: React 18 for component-based UI.
-- **Styling**: Plain CSS via `globals.css` (global reset) and `theme.css` (sectional styling). Can easily migrate to CSS Modules or Tailwind in the future.
-- **Backend**: Node.js runtime provided by Next.js API routes.
-- **Password Hashing**: bcrypt (npm package).
-- **Session/JWT**: NextAuth.js or custom JWT logic (to be decided in implementation).
-- **IDE & Dev Tools**: VS Code with ESLint, Prettier extensions. Optionally, Cursor.ai for AI-assisted coding.
-
----
+- **Frontend**: Next.js (App Router, Server & Client Components), TypeScript
+- **Styling**: Tailwind CSS v4, shadcn/ui component library
+- **State & Data Fetching**: React Query (TanStack Query) for server state, Zustand for complex form state
+- **Backend & APIs**: Next.js Server Actions for mutations, Server Components for data fetching
+- **Auth**: NextAuth.js (Auth.js) for session & role management
+- **Database**: PostgreSQL, Drizzle ORM (schema, migrations, seed scripts)
+- **Validation**: Zod for schema validation in Server Actions
+- **Print**: react-to-print for generating receipts
+- **Charts**: Recharts for report visualizations
+- **Testing**: Vitest for unit tests, Playwright for end-to-end tests
+- **IDE/Plugins**: VS Code (recommended), optional Cursor or Windsurf for AI-assisted coding
 
 ## 6. Non-Functional Requirements
-
-- **Performance**: Initial page load under 200 ms on a standard broadband connection. API responses under 300 ms.
-- **Security**:
-  - HTTPS only in production.
-  - Proper CORS, CSRF protection for API routes.
-  - Secure password storage (bcrypt with salt).
-  - No credentials or secrets checked into version control.
-- **Scalability**: Structure must support adding database integration, caching layers, and advanced auth flows without rewiring core app.
-- **Usability**: Forms should give real-time feedback on invalid input. Layout must be responsive (mobile > 320 px).
-- **Maintainability**: Code must adhere to TypeScript strict mode. Linting & formatting enforced by ESLint/Prettier.
-
----
+- **Performance**: Page loads under 2 seconds on 3G; data updates reflect in UI under 1 second.
+- **Security**: HTTPS everywhere; OWASP Top 10 mitigations; role-based access control enforced in middleware.
+- **Usability**: Responsive design across desktop/tablet/mobile; WCAG 2.1 AA accessibility standards.
+- **Scalability**: Support up to 1,000 daily orders; database indices on key fields (order ID, customer name).
+- **Reliability**: 99.9% uptime; automatic retries for transient DB connection errors.
+- **Compliance**: GDPR-friendly handling of personal data; audit logs for CRUD operations.
 
 ## 7. Constraints & Assumptions
-
-- **No Database**: Dashboard uses only `data.json`; real database integration is deferred.
-- **Node Version**: Requires Node.js >= 14.
-- **Next.js Version**: Built on Next.js 13+ App Router.
-- **Authentication**: Assumes availability of bcrypt or NextAuth.js at implementation time.
-- **Hosting**: Targets serverless or Node.js-capable hosting (e.g., Vercel, Netlify).
-- **Browser Support**: Modern evergreen browsers; no IE11 support required.
-
----
+- Deployment on a Node.js-compatible platform (Vercel, AWS, etc.) with PostgreSQL support.
+- Next.js App Router and Server Actions available in the target runtime.
+- Internet connectivity for employees and owners.
+- Minimum Node.js version ≥ 18, PostgreSQL ≥ 14.
+- Users have modern browsers (Chrome, Firefox, Edge, Safari).
+- Auth.js secrets and database credentials managed via environment variables.
 
 ## 8. Known Issues & Potential Pitfalls
-
-- **Static Data Limitation**: `data.json` is only for demo. A real API or database will be needed to avoid stale data.
-  *Mitigation*: Define a clear interface for data fetching so swapping to a live endpoint is trivial.
-
-- **Global CSS Conflicts**: Using global styles can lead to unintended overrides.
-  *Mitigation*: Plan to migrate to CSS Modules or utility-first CSS in Phase 2.
-
-- **API Route Ambiguity**: Single `/api/auth/route.ts` handling both sign-up and sign-in could get complex.
-  *Mitigation*: Clearly branch on HTTP method (`POST /register` vs. `POST /login`) or split into separate files.
-
-- **Lack of Testing**: No test suite means regressions can slip in.
-  *Mitigation*: Build a minimal Jest + React Testing Library setup in an early iteration.
-
-- **Error Handling Gaps**: Client and server must handle edge cases (network failures, malformed input).
-  *Mitigation*: Define a standard error response schema and show user-friendly messages.
+- **Form Double-Submit**: Mitigate by disabling buttons during Server Action calls.
+- **Database Migration Conflicts**: Use Drizzle’s migration lock and consistent environment setups.
+- **Cross-Browser PDF Print Layout**: Test `react-to-print` on all browsers; provide fallback PDF download if print fails.
+- **API Rate Limits**: If integrating external services later (e.g., SMS), plan for exponential backoff.
+- **Data Consistency on Concurrent Updates**: Use optimistic locking or version columns if simultaneous edits occur.
+- **Visual Flicker on Data Refetch**: Use React Query’s `placeholderData` and `keepPreviousData` to smooth UI transitions.
 
 ---
 
-This PRD should serve as the single source of truth for the AI model or any developer generating the next set of technical documents: Tech Stack Doc, Frontend Guidelines, Backend Structure, App Flow, File Structure, and IDE Rules. It contains all functional and non-functional requirements with no ambiguity, enabling seamless downstream development.
+This PRD captures all requirements for the initial release of the Laundry Management System. Subsequent documents (Tech Stack Details, Frontend Guidelines, Backend Structure, File Structure) can be generated directly from these clear specifications without ambiguity.
